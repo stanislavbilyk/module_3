@@ -1,0 +1,32 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'index.css' %}">
+    <title>{% block title %} {% endblock %}</title>
+</head>
+<body>
+
+<header>
+        <a href="{% url 'main' %}" class="HUINYA">HUINYA</a>
+    <form action="{% url 'search_products' %}" method="get" class="search-form">
+        <input type="text" name="query" placeholder="Search product..." value="{{ request.GET.query }}">
+        <button type="submit">Search</button>
+    </form>
+        <a href="{% url 'admin_menu' %}">Admin Menu</a>
+        <a href="{% url 'login' %}">Log in</a>
+        <a href="{% url 'register' %}">Sign up</a>
+        <a href="{% url 'profile' %}">My profile</a>
+        <form method="post" action="{% url 'logout' %}" style="display: inline;">
+    {% csrf_token %}
+    <button type="submit" style="background: none; border: none; color: blue; text-decoration: underline; cursor: pointer;">
+        Logout
+    </button>
+</form>
+    </header>
+<main>
+    {% block main %} {% endblock %}
+</main>
+</body>
+</html>

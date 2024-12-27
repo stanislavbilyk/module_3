@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'index.css' %}">
+    <title>{% block title %} {% endblock %}</title>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Admin Menu</h2>
+        <ul>
+            <li><a href="{% url 'admin_menu' %}">View and update</a></li>
+            <li><a href="{% url 'add_new_product' %}">Add new product</a></li>
+            <li><a href="{% url 'view_refunds' %}">Refund</a></li>
+            <li><a href="/">Back to Main page</a></li>
+        </ul>
+    </div>
+    <div class="main-content">
+        <header>
+            <h1>Главная страница</h1>
+        </header>
+        <p>Здесь будет содержимое страницы. Вы можете добавить текст, таблицы, или любой другой контент.</p>
+    </div>
+<main>
+     {% block main %} {% endblock %}
+</main>
+</body>
+</html>

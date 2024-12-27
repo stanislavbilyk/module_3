@@ -1,0 +1,31 @@
+{% extends 'base_admin.html' %}
+
+{% block title %}
+Admin Menu. List of refunds
+{% endblock %}
+
+{% block main %}
+<div class="Admin_menu_items">
+    <h1>List of refunds</h1>
+    <ul class="List_of_refunds">
+    {% for refund in refund_list %}
+        <li>
+            <ul class="Refund">
+                <li class="Name_of_item">Name of purchase {{ refund.purchase.name }}</li><br>
+                <li class="Name_of_item">Quantity {{ refund.purchase.quantity_of_purchase }}</li><br>
+                <li class="Description_of_item">Time of purchase {{ refund.purchase.time_of_purchase }}</li><br>
+                <li class="Description_of_item">Time of refund {{ refund.time_of_refund }}</li><br>
+                <li class="Description_of_item">User {{ refund.purchase.user }}</li><br>
+            </ul>
+        </li>
+        <li>
+            <form action="{% url 'refund_decision' %}" method="POST">
+                <input type="hidden" name="refund_id" value="{{ refund.id }}" />
+                <input type="submit" name="accept" value="Accept">
+                <input type="submit" name="decline" value="Decline">
+            </form>
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+{% endblock %}

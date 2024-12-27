@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Search page
+{% endblock %}
+
+{% block main %}
+<h1>Результаты поиска</h1>
+<form action="{% 'search_products' %}" method="get">
+    {{ form.as_p }}
+    <button type="submit">Search</button>
+</form>
+
+{% if products %}
+    <ul>
+        {% for product in products %}
+        <li> {{ product.name}} - {{ product.price }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Nothing found</p>
+{% enfif %}
+{% endblock %}
