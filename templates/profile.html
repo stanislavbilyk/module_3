@@ -22,8 +22,6 @@ Your balance {{ user.wallet_balance }} <br>
         <form action="{% url 'refund' %}" method="POST">
         {% csrf_token %}
         <input type="hidden" name="purchase_id" value="{{ purchase.id }}" />
-        <input type="hidden" name="purchase_product" value="{{ purchase.product }}" />
-        <input type="hidden" name="purchase_quantity_of_purchase" value="{{ purchase.quantity_of_purchase }}" />
         <input type="hidden" name="purchase_time_of_purchase" value="{{ purchase.time_of_purchase|date:"U" }}" />
         <button>Return goods and refund</button>
 </form>
