@@ -73,8 +73,13 @@ class ProductUpdate(UpdateView):
     model = Product
     form_class = ProductUpdateForm
     template_name = 'product_update_form.html'
+    success_url = '/'
 
-
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        product = self.get_object()
+        context['form'] = ProductUpdateForm(instance=product)
+        return context
 
 def search_products(request):
     form = ProductSearchForm(request.GET or None)
@@ -211,12 +216,15 @@ class AddNewProduct(UserPassesTestMixin, CreateView):
     model = Product
     template_name = 'add_new_product.html'
     form_class = AddNewProductForm
+    success_url = '/'
     def test_func(self):
         return self.request.user.is_superuser
 
     def handle_no_permission(self):
         from django.http import HttpResponseForbidden
         return HttpResponseForbidden("Access denied: You must be a superuser to access this page.")
+
+
 
 
 
