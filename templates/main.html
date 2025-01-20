@@ -25,6 +25,7 @@ Main page
                         <li class="Quantity">In stock   {{ product.quantity_on_storage }}</li>
                     </ul><br>
                 </li>
+                {% if user.is_authenticated %}
                 <li class="Purchase_section">
                     <form action="{% url 'purchase' %}" method="POST">
                         {% csrf_token %}
@@ -35,6 +36,7 @@ Main page
                         </ul>
                     </form>
                 </li>
+                {% endif %}
             </ul>
         </li>
     {% endfor %}

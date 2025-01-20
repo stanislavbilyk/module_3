@@ -6,18 +6,43 @@
 
 {% block main %}
 <h1>Результаты поиска</h1>
-<form action="{% 'search_products' %}" method="get">
-    {{ form.as_p }}
-    <button type="submit">Search</button>
-</form>
+
 
 {% if products %}
-    <ul>
+    <ul class="List_of_products">
         {% for product in products %}
-        <li> {{ product.name}} - {{ product.price }}</li>
+        <li>
+            <a href="{% url 'product_id' product.pk %}" style="text-decoration: none; color: inherit">
+            <ul class="Top_of_item">
+                <li class="Name_of_item">{{ product.name }}</li><br>
+                <li class="Image_of_item"><img src="{{ product.image.url }}" alt="{{ product.name }}" style="max-width: 200px"></li><br>
+                <li class="Description_of_item">{{ product.description|truncatechars:100 }}</li><br>
+            </ul>
+            </a>
+            <ul class="Bottom_of_item">
+                <li class="Price_section">
+                    <ul class="Price_and_stock">
+                        <li class="Price">Price   {{ product.price }}</li>
+                        <li class="Quantity">In stock   {{ product.quantity_on_storage }}</li>
+                    </ul><br>
+                </li>
+                {% if user.is_authenticated %}
+                <li class="Purchase_section">
+                    <form action="{% url 'purchase' %}" method="POST">
+                        {% csrf_token %}
+                        <ul class="Buy">
+                            <input type="hidden" name="product_id" value="{{ product.id }}" />
+                            <li><input type="number" name="quantity" value="1" min="1" step="1" /></li>
+                            <li class="Add_to_card"><button>Buy</button></li>
+                        </ul>
+                    </form>
+                </li>
+                {% endif %}
+            </ul>
+        </li>
         {% endfor %}
     </ul>
 {% else %}
     <p>Nothing found</p>
-{% enfif %}
+{% endif %}
 {% endblock %}

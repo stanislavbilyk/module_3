@@ -34,9 +34,7 @@ Admin Menu. List of products
                             <li class="Add_to_card"><button>Buy</button></li>
                         </ul>
                     </form>
-                    <form action="{% url 'product_update' product.pk %}" method="POST">
-                        {% csrf_token %}
-                        {{ form.as_p }}
+                    <form action="{% url 'product_update' product.pk %}" method="GET">
                         <input type="submit" value="Update">
                     </form>
                 </li>

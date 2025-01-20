@@ -20,7 +20,7 @@ from myapp import views
 from django.conf import settings
 from django.conf.urls.static import static
 
-from myapp.views import Login, Register, Logout, ProfileView, PloductListView, ProductView, RefundListView, PurchaseView, RefundView
+from myapp.views import Login, Register, Logout, ProfileView, PloductListView, ProductView, RefundListView, PurchaseView, RefundView, SearchProductsView
 
 
 
@@ -31,7 +31,7 @@ urlpatterns = [
     path('register/', Register.as_view(), name='register'),
     path('logout/', Logout.as_view(), name='logout'),
     path('profile/', ProfileView.as_view(), name='profile'),
-    path('search/', views.search_products, name='search_products'),
+    path('search/', SearchProductsView.as_view(), name='search_products'),
     path('product/<int:pk>/', ProductView.as_view(), name='product_id'),
     path('purchase', PurchaseView.as_view(), name='purchase'),
     path('admin_menu/', include('myapp.admin_menu')),

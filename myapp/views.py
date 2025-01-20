@@ -75,20 +75,30 @@ class ProductUpdate(UpdateView):
     template_name = 'product_update_form.html'
     success_url = '/'
 
+   
+# def search_products(request):
+#     form = ProductSearchForm(request.GET or None)
+#     products = None
+#     if form.is_valid():
+#         query = form.cleaned_data.get('query')
+#         if query:
+#             products = Product.objects.filter(name__icontains=query)
+#     return render(request, 'search_results.html', {'form':form, 'products':products})
+
+class SearchProductsView(ListView):
+    template_name = 'search_results.html'
+    form_class = ProductSearchForm
+    queryset = Product.objects.all()
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        product = self.get_object()
-        context['form'] = ProductUpdateForm(instance=product)
+        query = self.request.GET.get('query', '')
+        if query:
+            context['products'] = Product.objects.filter(name__icontains=query)
+            context['products'] = Product.objects.filter(description__icontains=query)
+        else:
+            context['products'] = Product.objects.none()
         return context
 
-def search_products(request):
-    form = ProductSearchForm(request.GET or None)
-    products = None
-    if form.is_valid():
-        query = form.cleaned_data.get('query')
-        if query:
-            products = Product.objects.filter(name__icontains=query)
-    return render(request, 'search_results.html', {'form':form, 'products':products})
 
 
 class PurchaseView(View):
