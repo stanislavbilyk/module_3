@@ -2,16 +2,19 @@ import time
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import LogoutView, LoginView
-from django.db import transaction
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, resolve_url, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.utils.deprecation import MiddlewareMixin
-from django.views.generic import CreateView, DetailView, ListView, UpdateView
+from django.views.generic import CreateView, DetailView, ListView, UpdateView, FormView, TemplateView
+from django.db import transaction
+from django.contrib import messages
+
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
 
-from .forms import AuthenticationForm, CustomUserCreationForm, ProductSearchForm, AddNewProductForm, ProductUpdateForm
+from .forms import AuthenticationForm, UserCreationForm, ProductSearchForm, AddNewProductForm, ProductUpdateForm, \
+    PurchaseCreateForm
 from django.contrib.auth import login, logout
 from django.views import View
 
@@ -28,19 +31,9 @@ class Login(LoginView):
 
 
 class Register(CreateView):
-    form_class = CustomUserCreationForm
+    form_class = UserCreationForm
     template_name = 'register.html'
     success_url = '/profile/'
-
-    def form_valid(self, form):
-        user = form.save(commit=False)
-        user.wallet_balance = 10000.00  # Устанавливаем начальный баланс
-        # Сохраняем нового пользователя
-        user = form.save()
-        # Логиним пользователя
-        login(self.request, user)
-        # Перенаправляем на success_url
-        return redirect(self.success_url)
 
 
 class Logout(LoginRequiredMixin, LogoutView):
@@ -56,18 +49,16 @@ class ProfileView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['purchases'] = Purchase.objects.filter(user=self.request.user)
+        context['purchases'] = self.request.user.purchases.all()
         return context
 
-class PloductListView(ListView):
+class ProductListView(ListView):
     model = Product
     template_name = 'main.html'
 
 class ProductView(DetailView):
     model = Product
     template_name = 'product_id.html'
-    def get_object(self, queryset=None):
-        return Product.objects.get(pk=self.kwargs['pk'])
 
 class ProductUpdate(UpdateView):
     model = Product
@@ -76,15 +67,6 @@ class ProductUpdate(UpdateView):
     success_url = '/'
 
    
-# def search_products(request):
-#     form = ProductSearchForm(request.GET or None)
-#     products = None
-#     if form.is_valid():
-#         query = form.cleaned_data.get('query')
-#         if query:
-#             products = Product.objects.filter(name__icontains=query)
-#     return render(request, 'search_results.html', {'form':form, 'products':products})
-
 class SearchProductsView(ListView):
     template_name = 'search_results.html'
     form_class = ProductSearchForm
@@ -100,26 +82,45 @@ class SearchProductsView(ListView):
         return context
 
 
+class PurchaseView(DetailView):
+    model = Product
+    template_name = 'purchase.html'
+    context_object_name = 'product'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        quantity = self.request.GET.get('quantity', 1)  # Значение по умолчанию 1
+        try:
+            context['quantity'] = int(quantity)
+        except ValueError:
+            context['quantity'] = 1  # Если некорректный ввод, ставим 1
+        return context
 
-class PurchaseView(View):
-    def post(self, request, *args, **kwargs):
-        product_id = request.POST.get('product_id')
-        quantity = request.POST.get('quantity')
 
+class CreatePurchaseView(CreateView):
+    model = Purchase
+    http_method_names = ['get', 'post']
+    template_name = 'create_purchase.html'
+    success_url = 'profile.html'
+    form_class = PurchaseCreateForm
+
+    def form_valid(self, form):
+        """If the form is valid, save the associated model."""
+        product_id = form.cleaned_data['product_id']
+        quantity = form.cleaned_data['quantity_of_purchase']
         try:
             quantity = int(quantity)
             if quantity < 1:
-                return JsonResponse({'error': 'Invalid quantity'}, status=400)
+                messages.error(self.request, 'Invalid quantity')
         except (TypeError, ValueError):
-            return JsonResponse({'error': 'Invalid quantity format'}, status=400)
+            messages.error(self.request, 'Invalid quantity format')
 
-        user = request.user
+        user = self.object.user
         product = get_object_or_404(Product, id=product_id)
 
         if product.quantity_on_storage < quantity:
-            return JsonResponse({'error': 'Not enough stock'}, status=400)
+            messages.error(self.request, 'Not enough stock')
         if user.wallet_balance < product.price * quantity:
-            return JsonResponse({'error': 'Insufficient balance'}, status=400)
+            messages.error(self.request, 'Insufficient balance')
 
         with transaction.atomic():
             product.quantity_on_storage -= quantity
@@ -128,8 +129,46 @@ class PurchaseView(View):
             user.wallet_balance -= product.price * quantity
             user.save()
 
-            Purchase.objects.create(user=user, product=product, quantity_of_purchase=quantity)
-        return JsonResponse({'success': f'You purchased {quantity} {product.name}'}, status=200)
+            purchase = form.save(commit=False)
+            purchase.user = user
+            purchase.product = product
+            purchase.save()
+        messages.success(self.request, f'You purchased {quantity} {product.name}')
+
+
+        return redirect(self.get_success_url())
+
+
+
+# class PurchaseView(View):
+#     def post(self, request, *args, **kwargs):
+#         product_id = request.POST.get('product_id')
+#         quantity = request.POST.get('quantity')
+#
+#         try:
+#             quantity = int(quantity)
+#             if quantity < 1:
+#                 return JsonResponse({'error': 'Invalid quantity'}, status=400)
+#         except (TypeError, ValueError):
+#             return JsonResponse({'error': 'Invalid quantity format'}, status=400)
+#
+#         user = request.user
+#         product = get_object_or_404(Product, id=product_id)
+#
+#         if product.quantity_on_storage < quantity:
+#             return JsonResponse({'error': 'Not enough stock'}, status=400)
+#         if user.wallet_balance < product.price * quantity:
+#             return JsonResponse({'error': 'Insufficient balance'}, status=400)
+#
+#         with transaction.atomic():
+#             product.quantity_on_storage -= quantity
+#             product.save()
+#
+#             user.wallet_balance -= product.price * quantity
+#             user.save()
+#
+#             Purchase.objects.create(user=user, product=product, quantity_of_purchase=quantity)
+#         return JsonResponse({'success': f'You purchased {quantity} {product.name}'}, status=200)
 
 
 class RefundView(View):

@@ -27,7 +27,7 @@ Main page
                 </li>
                 {% if user.is_authenticated %}
                 <li class="Purchase_section">
-                    <form action="{% url 'purchase' %}" method="POST">
+                    <form action="{% url 'purchase' product.pk %}" method="GET">
                         {% csrf_token %}
                         <ul class="Buy">
                             <input type="hidden" name="product_id" value="{{ product.id }}" />

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Page of purchase
+{% endblock %}
+
+{% block main %}
+
+<h1>{{ product.name }}</h1> <br>
+ <img src="{{ product.image.url }}" alt="{{ product.name }}" style="max-width: 200px"> <br>
+ {{ product.description }} <br>
+ <p>Price  {{ product.price }}</p>
+ <p>Quantity  {{ quantity }}</p>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert {{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+<form action="{% url 'create_purchase' %}" method="POST">
+    {% csrf_token %}
+    {{ form }}
+    <input type="hidden" name="product_id" value="{{ product.id }}" />
+    <input type="hidden" name="quantity" value= {{ quantity }} />
+    <input type="submit" value="Buy">
+</form>
+
+{% endblock %}

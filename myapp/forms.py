@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate
 from django import forms
 
-from .models import CustomUser, Product
+from .models import CustomUser, Product, Purchase
 
 
 class AuthenticationForm(forms.Form):
@@ -17,7 +17,7 @@ class AuthenticationForm(forms.Form):
                 raise forms.ValidationError("Incorrect username/password")
 
 
-class CustomUserCreationForm(forms.ModelForm):
+class UserCreationForm(forms.ModelForm):
     error_messages = {
         'password_mismatch': ("The two password fields didn't match."),
     }
@@ -39,7 +39,7 @@ class CustomUserCreationForm(forms.ModelForm):
             )
         return password2
     def save(self, commit=True):
-        user = super().save(commit=False)
+        user = super(UserCreationForm, self).save(commit=False)
         user.set_password(self.cleaned_data["password1"])
         if commit:
             user.save()
@@ -58,4 +58,10 @@ class ProductUpdateForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = ['name', 'description', 'price', 'image', 'quantity_on_storage']
+
+class PurchaseCreateForm(forms.ModelForm):
+    class Meta:
+        model = Purchase
+        fields = ('product', 'quantity_of_purchase')
+
 

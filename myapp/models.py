@@ -38,7 +38,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=30, unique=True)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
-    wallet_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    wallet_balance = models.DecimalField(max_digits=10, decimal_places=2, default=10000.00)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
@@ -60,7 +60,7 @@ class Product(models.Model):
 
 class Purchase(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='purchases', null=True)
-    product = models.ForeignKey(Product, on_delete=models.SET_NULL, related_name='products', null=True)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, related_name='purchases', null=True)
     quantity_of_purchase = models.IntegerField(validators=[MinValueValidator(0)])
     time_of_purchase = models.DateTimeField(auto_now_add=True)
 
