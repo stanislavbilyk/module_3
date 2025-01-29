@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+<body>
+<span>Wanna register? <a href="{% url 'register' %}">Sign Up</a></span>
+
+<form method="post" autocomplete="off">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Login">
+</form>
+</body>
+</html>

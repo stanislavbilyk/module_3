@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Profile
+{% endblock %}
+
+{% block main %}
+
+<h1>Your profile</h1>
+Username {{ user.username }} <br>
+Name {{ user.first_name }} <br>
+Surname {{ user.last_name }} <br>
+Your balance {{ user.wallet_balance }} <br>
+<h2>Your purchases</h2>
+<ul>
+    {% for purchase in purchases %}
+    <li>Name of purchase {{ purchase.product.name }} <br>
+        Quantity {{ purchase.quantity_of_purchase }} <br>
+        Time of purchase {{ purchase.time_of_purchase }}
+    </li>
+    <li>
+        <form action="{% url 'refund' %}" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="purchase_id" value="{{ purchase.id }}" />
+        <input type="hidden" name="purchase_time_of_purchase" value="{{ purchase.time_of_purchase|date:"U" }}" />
+        <button>Return goods and refund</button>
+</form>
+    </li>
+    {% endfor %}
+</ul>
+
+
+
+{% endblock %}

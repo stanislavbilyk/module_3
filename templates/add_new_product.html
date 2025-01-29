@@ -1,0 +1,15 @@
+{% extends 'base_admin.html' %}
+
+{% block title %}
+    Adding new product
+{% endblock %}
+
+{% block main %}
+    <div class="Admin_menu_items">
+    <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Send">
+</form>
+     </div>
+{% endblock %}
