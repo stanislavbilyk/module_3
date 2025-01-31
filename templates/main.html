@@ -27,11 +27,10 @@ Main page
                 </li>
                 {% if user.is_authenticated %}
                 <li class="Purchase_section">
-                    <form action="{% url 'purchase' product.pk %}" method="GET">
+                    <form action="{% url 'purchase' product.pk %}" method="POST">
                         {% csrf_token %}
                         <ul class="Buy">
-                            <input type="hidden" name="product_id" value="{{ product.id }}" />
-                            <li><input type="number" name="quantity" value="1" min="1" step="1" /></li>
+                            <li>{{ purchase_form.quantity_of_purchase }}</li>
                             <li class="Add_to_card"><button>Buy</button></li>
                         </ul>
                     </form>

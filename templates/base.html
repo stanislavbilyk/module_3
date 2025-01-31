@@ -9,29 +9,42 @@
 <body>
 
 <header>
-        <a href="{% url 'main' %}" class="HUINYA">HUINYA</a>
-        <form action="{% url 'search_products' %}" method="get" class="search-form">
-        <input type="text" name="query" placeholder="Search product..." value="{{ request.GET.query }}">
+    <a href="{% url 'main' %}" class="HUINYA">HUINYA</a>
+    <form action="{% url 'main' %}" class="search-form">
+        {{ search_form.query }}
         <button type="submit">Search</button>
-        </form>
-        {% if user.is_superuser %}
+    </form>
+    {% if user.is_superuser %}
         <a href="{% url 'admin_menu' %}">Admin Menu</a>
-        {% endif %}
-        <a href="{% url 'register' %}">Sign up</a>
-        {% if user.is_authenticated %}
+    {% endif %}
+    <a href="{% url 'register' %}">Sign up</a>
+    {% if user.is_authenticated %}
         <a href="{% url 'profile' %}">My profile</a>
         Hello, {{ user.username }}
         <form method="post" action="{% url 'logout' %}" style="display: inline;">
-        {% csrf_token %}
-        <button type="submit" style="background: none; border: none; color: blue; text-decoration: underline; cursor: pointer;">
-        Logout
-        </button>
+            {% csrf_token %}
+            <button type="submit"
+                    style="background: none; border: none; color: blue; text-decoration: underline; cursor: pointer;">
+                Logout
+            </button>
         </form>
-        {% else %}
+    {% else %}
         <a href="{% url 'login' %}">Log in</a>
-        {% endif %}
-    </header>
+    {% endif %}
+</header>
 <main>
+    {% if messages %}
+        <div class="messages">
+            <div class="messages-block">
+                {% for message in messages %}
+                    <div{% if message.tags %} class="{{ message.tags }}" {% endif %}>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+
+            </div>
+        </div>
+    {% endif %}
     {% block main %} {% endblock %}
 </main>
 </body>
