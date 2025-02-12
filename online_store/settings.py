@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'myapp',
     'rest_framework',
+    'rest_framework.authtoken',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -64,6 +66,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'myapp.context_processors.search_form'
             ],
         },
     },
@@ -141,3 +144,9 @@ MEDIA_URL = '/media/'
 LOGIN_URL = '/login'
 
 AUTH_USER_MODEL = 'myapp.CustomUser'
+
+TOKEN_EXPIRE_SECONDS = 6000
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': ("myapp.api.authentication.TokenExpireAuthentication",),
+}

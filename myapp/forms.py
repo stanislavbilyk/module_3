@@ -1,5 +1,8 @@
 from django.contrib.auth import authenticate
 from django import forms
+from django.core.exceptions import ValidationError
+from django.shortcuts import get_object_or_404
+from django.contrib import messages
 
 from .models import CustomUser, Product, Purchase
 
@@ -62,6 +65,58 @@ class ProductUpdateForm(forms.ModelForm):
 class PurchaseCreateForm(forms.ModelForm):
     class Meta:
         model = Purchase
-        fields = ('product', 'quantity_of_purchase')
+        fields = ('quantity_of_purchase',)
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        self.product = kwargs.pop('product', None)
+        super().__init__(*args, **kwargs)
+    def clean(self):
+        print('Test')
+        cleaned_data = super().clean()
+        request = self.request
+        product = self.product
+        quantity = cleaned_data.get('quantity_of_purchase')
+        quantity = int(quantity)
+        print("DEBUG: product =", product)  # Посмотрим, есть ли продукт
+        print("DEBUG: quantity =", quantity)  # Проверим количество
+        # if not product or not quantity_of_purchase:
+        #     return cleaned_data
+        raise_an_error = False
+        if quantity < 1:
+            messages.error(self.request, "Invalid quantity")
+            raise_an_error = True
+        if product.quantity_on_storage < quantity:
+            messages.error(self.request, "Not enough quantity on storage")
+            raise_an_error = True
+        if request.user.wallet_balance < product.price * quantity:
+            messages.error(self.request, "Insufficient balance")
+            raise_an_error = True
+        if raise_an_error:
+            raise forms.ValidationError("Error occurred")
+        return cleaned_data
+            # try:
+            #     quantity = int(quantity_of_purchase)
+            #     if quantity < 1:
+            #         raise ValidationError("Invalid quantity")
+            # except (TypeError, ValueError):
+            #     raise ValidationError("Invalid quantity format")
+
+            # product = Product.objects.filter(id=product).first()
+            # print(product.name)
+            # print(product.quantity_on_storage)
+            # print(product.price)
+            # print(quantity)
+            # if not product:
+            #     raise ValidationError("Product not found")
+            #
+            # if product.quantity_on_storage < quantity:
+            #     raise ValidationError("Not enough stock")
+            # if self.user.wallet_balance < product.price * quantity:
+            #     raise ValidationError("Insufficient balance")
+            #
+            # return cleaned_data
+
+
+
 
 

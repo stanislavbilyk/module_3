@@ -10,8 +10,9 @@
 
 <header>
         <a href="{% url 'main' %}" class="HUINYA">HUINYA</a>
-        <form action="{% url 'search_products' %}" method="get" class="search-form">
-        <input type="text" name="query" placeholder="Search product..." value="{{ request.GET.query }}">
+        <form action="{% url 'main' %}" class="search-form">
+<!--        <input type="text" name="query" placeholder="Search product..." value="{{ request.GET.query }}">-->
+        {{ search_form.query }}
         <button type="submit">Search</button>
         </form>
         {% if user.is_superuser %}
@@ -32,6 +33,17 @@
         {% endif %}
     </header>
 <main>
+    {% if messages %}
+        <div class="messages">
+            <div class="messages-block">
+                {% for message in messages %}
+                    <div {% if message.tags %} class="{{ message.tags }}" {% endif %}>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
     {% block main %} {% endblock %}
 </main>
 </body>

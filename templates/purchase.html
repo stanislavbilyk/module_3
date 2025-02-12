@@ -21,8 +21,8 @@ Page of purchase
 <form action="{% url 'create_purchase' %}" method="POST">
     {% csrf_token %}
     {{ form }}
-    <input type="hidden" name="product_id" value="{{ product.id }}" />
-    <input type="hidden" name="quantity" value= {{ quantity }} />
+    <input type="hidden" name="product" value="{{ product.id }}" />
+    <input type="hidden" name="quantity_of_purchase" value= {{ quantity }} />
     <input type="submit" value="Buy">
 </form>
 

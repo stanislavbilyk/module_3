@@ -153,3 +153,21 @@ header h1 {
     width: calc(100% - 250px);
     overflow: auto;
 }
+
+.messages{
+    display: flex;
+    justify-content: center;
+    margin: 20px;
+    font-size: 35px;
+}
+
+.error{
+    border: 2px solid #ef480c;
+    border-radius: 10px;
+    margin: 5px;
+}
+.success {
+    border: 2px solid #5fef0c;
+    border-radius: 10px;
+    margin: 5px;
+}

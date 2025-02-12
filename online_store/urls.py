@@ -16,12 +16,19 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from myapp import views
 from django.conf import settings
 from django.conf.urls.static import static
 
-from myapp.views import Login, Register, Logout, ProfileView, ProductListView, ProductView, RefundListView, PurchaseView, RefundView, SearchProductsView, CreatePurchaseView
-
+from myapp.views import Login, Register, Logout, ProfileView, ProductListView, ProductView, RefundListView, RefundView, CreatePurchaseView
+from rest_framework.authtoken.views import obtain_auth_token
+from myapp.api.resources import RegisterAPIView, ProductViewSet, PurchaseViewSet, ProfileViewSet, RefundViewSet, RefundListViewSet
+from rest_framework import routers
+router = routers.DefaultRouter()
+router.register(r'products', ProductViewSet)
+router.register(r'purchase', PurchaseViewSet)
+router.register(r'profile', ProfileViewSet)
+router.register(r'refund', RefundViewSet, basename='refunds')
+router.register(r'refund_list', RefundListViewSet, basename='refund-list')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,12 +37,15 @@ urlpatterns = [
     path('register/', Register.as_view(), name='register'),
     path('logout/', Logout.as_view(), name='logout'),
     path('profile/', ProfileView.as_view(), name='profile'),
-    path('search/', SearchProductsView.as_view(), name='search_products'),
+    # path('search/', SearchProductsView.as_view(), name='search_products'),
     path('product/<int:pk>/', ProductView.as_view(), name='product_id'),
-    path('purchase/<int:pk>/', PurchaseView.as_view(), name='purchase'),
-    path('create_purchase/', CreatePurchaseView.as_view(), name = 'create_purchase'),
+    # path('purchase/<int:pk>/', PurchaseView.as_view(), name='purchase'),
+    path('create_purchase/<int:pk>/', CreatePurchaseView.as_view(), name = 'purchase'),
     path('admin_menu/', include('myapp.admin_menu')),
-    path('refund', RefundView.as_view(), name='refund')
+    path('refund', RefundView.as_view(), name='refund'),
+    path('api/register/', RegisterAPIView.as_view()),
+    path('api/token/', obtain_auth_token),
+    path('api/', include(router.urls)),
 ]
 
 if settings.DEBUG:
