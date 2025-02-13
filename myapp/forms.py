@@ -71,16 +71,12 @@ class PurchaseCreateForm(forms.ModelForm):
         self.product = kwargs.pop('product', None)
         super().__init__(*args, **kwargs)
     def clean(self):
-        print('Test')
         cleaned_data = super().clean()
         request = self.request
         product = self.product
         quantity = cleaned_data.get('quantity_of_purchase')
         quantity = int(quantity)
-        print("DEBUG: product =", product)  # Посмотрим, есть ли продукт
-        print("DEBUG: quantity =", quantity)  # Проверим количество
-        # if not product or not quantity_of_purchase:
-        #     return cleaned_data
+
         raise_an_error = False
         if quantity < 1:
             messages.error(self.request, "Invalid quantity")
@@ -94,29 +90,6 @@ class PurchaseCreateForm(forms.ModelForm):
         if raise_an_error:
             raise forms.ValidationError("Error occurred")
         return cleaned_data
-            # try:
-            #     quantity = int(quantity_of_purchase)
-            #     if quantity < 1:
-            #         raise ValidationError("Invalid quantity")
-            # except (TypeError, ValueError):
-            #     raise ValidationError("Invalid quantity format")
-
-            # product = Product.objects.filter(id=product).first()
-            # print(product.name)
-            # print(product.quantity_on_storage)
-            # print(product.price)
-            # print(quantity)
-            # if not product:
-            #     raise ValidationError("Product not found")
-            #
-            # if product.quantity_on_storage < quantity:
-            #     raise ValidationError("Not enough stock")
-            # if self.user.wallet_balance < product.price * quantity:
-            #     raise ValidationError("Insufficient balance")
-            #
-            # return cleaned_data
-
-
 
 
 
