@@ -96,9 +96,20 @@ class RefundAcceptViewSet(viewsets.ModelViewSet):
     queryset = Refund.objects.all()
     http_method_names = ['delete']
     serializer_class = RefundSerializer
-    permission_classes = [IsAuthenticated] #issuperuser
+    permission_classes = [IsAdminUser] #issuperuser
     def destroy(self, request, *args, **kwargs):
-        refund = self.request("refund")
+        refund = get_object_or_404(Refund, pk=kwargs["pk"])
+        product = refund.purchase.product
+        price = product.price
+        quantity = refund.purchase.quantity_of_purchase
+        user = request.user
+        with transaction.atomic():
+            product.quantity_on_storage += quantity
+            product.save()
+            user.wallet_balance += price * quantity
+            user.save()
+        refund.delete()
+        return Response({"message": "Refund deleted"}, status=204)
 
 
 class RefundListViewSet(BaseRefundViewSet):

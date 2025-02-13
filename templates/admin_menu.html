@@ -26,7 +26,7 @@ Admin Menu. List of products
                     </ul><br>
                 </li>
                 <li class="Purchase_section">
-                    <form action="{% url 'purchase' %}" method="POST">
+                    <form action="{% url 'purchase' product.id %}" method="POST">
                         {% csrf_token %}
                         <ul class="Buy">
                             <input type="hidden" name="product_id" value="{{ product.id }}" />

@@ -227,33 +227,61 @@ class CreatePurchaseView(SuccessMessageMixin, CreateView):
 #         return JsonResponse({'success': f'You purchased {quantity} {product.name}'}, status=200)
 
 
-class RefundView(View):
-    def post(self, request, *args, **kwargs):
-        purchase_id = request.POST.get('purchase_id')
+class RefundView(SuperUserPassesTestMixin, View):
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["purchase"] = self.get_purchase()
+        return kwargs
 
-        try:
-            purchase_id = int(purchase_id)
-            purchase = Purchase.objects.get(id=purchase_id)
-        except (TypeError, ValueError):
-            return JsonResponse({'error': 'Invalid purchase_id format'}, status=400)
-        except Purchase.DoesNotExist:
-            return JsonResponse({'error': 'Purchase not found'}, status=404)
+    def get_purchase(self):
+        return get_object_or_404(Purchase, id=self.kwargs["pk"])
 
-        time_of_purchase = request.POST.get('purchase_time_of_purchase')
-        if not time_of_purchase:
-            return JsonResponse({'error': 'Missing time_of_purchase'}, status=400)
+    def form_valid(self):
+        purchase = self.get_purchase()
+        time_of_purchase = purchase.time_of_purchase
 
-        try:
-            time_of_purchase = float(time_of_purchase)
-        except ValueError:
-            return JsonResponse({'error': 'Invalid time_of_purchase'}, status=400)
+        with transaction.atomic():
+            try:
+                time_of_purchase = float(time_of_purchase)
+            except ValueError:
+                    return JsonResponse({'error': 'Invalid time_of_purchase'}, status=400)
+            current_time = time.time()
+            if current_time - time_of_purchase < 90:
+                Refund.objects.create(purchase=purchase)
+                return JsonResponse({'success': 'Refund processed'}, status=200)
+            else:
+                return JsonResponse({'error': 'Sorry, but you can no longer return the product'}, status=400)
 
-        current_time = time.time()
-        if current_time - time_of_purchase < 90:
-            Refund.objects.create(purchase=purchase)
-            return JsonResponse({'success': 'Refund processed'}, status=200)
-        else:
-            return JsonResponse({'error': 'Sorry, but you can no longer return the product'}, status=400)
+
+
+
+
+    # def post(self, request, *args, **kwargs):
+    #     purchase_id = request.POST.get('purchase_id')
+
+        # try:
+        #     purchase_id = int(purchase_id)
+        #     purchase = Purchase.objects.get(id=purchase_id)
+        # except (TypeError, ValueError):
+        #     return JsonResponse({'error': 'Invalid purchase_id format'}, status=400)
+        # except Purchase.DoesNotExist:
+        #     return JsonResponse({'error': 'Purchase not found'}, status=404)
+
+#         time_of_purchase = request.POST.get('purchase_time_of_purchase')
+#         if not time_of_purchase:
+#             return JsonResponse({'error': 'Missing time_of_purchase'}, status=400)
+
+#         try:
+#             time_of_purchase = float(time_of_purchase)
+#         except ValueError:
+#             return JsonResponse({'error': 'Invalid time_of_purchase'}, status=400)
+
+#         current_time = time.time()
+#         if current_time - time_of_purchase < 90:
+#             Refund.objects.create(purchase=purchase)
+#             return JsonResponse({'success': 'Refund processed'}, status=200)
+#         else:
+#             return JsonResponse({'error': 'Sorry, but you can no longer return the product'}, status=400)
 
 
 class RefundListView(SuperUserPassesTestMixin, ListView):
@@ -310,8 +338,8 @@ class AdminMenuListView(SuperUserPassesTestMixin, ListView):
     model = Product
     template_name = 'admin_menu.html'
     
-    # def test_func(self):
-    #     return self.request.user.is_superuser
+    def test_func(self):
+        return self.request.user.is_superuser
 
 #     def handle_no_permission(self):
 #         from django.http import HttpResponseForbidden
